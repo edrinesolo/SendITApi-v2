@@ -27,10 +27,10 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
-        if 'x-access-token' in request.headers:
-            token = request.headers['x-access-token']
+        if 'token' in request.headers:
+            token = request.headers['token']
         if not token:
-            return jsonify({"msg": "Not logged in,please login"}), 401
+            return jsonify({"message": "please login"}), 401
 
         try:
             data = jwt.decode(token, 'trulysKey')

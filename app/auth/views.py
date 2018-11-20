@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
 
+from app.auth.decorator import get_token
 from app.database.database import Database
 from app.model.models import User
 
@@ -39,11 +40,11 @@ def create_user():
 
         if not re.match("[0-9]", phone_number):
             return response_message('Invalid', 'Phone Number should not contain letters ex.075+++++++', 400)
-        if not isinstance(fullname,str):
+        if not isinstance(fullname, str):
             return response_message('Invalid', 'Fullname should be string value', 400)
 
         if len(str(fullname)) < 2:
-               return response_message('Invalid', 'FullName should be atleaset 2 characters long', 400)
+            return response_message('Invalid', 'FullName should be atleaset 2 characters long', 400)
 
         if len(username) < 4:
             return response_message('Invalid', 'UserName  should be atleaset 4 characters long', 400)
@@ -73,7 +74,7 @@ def create_user():
         db.insert_into_user(fullname, username, email, phone_number, password)
         return response_message('Success', 'User account successfully created, you can now login', 201)
     except KeyError as e:
-        return jsonify({'Error': str(e) +' is missing'}),400
+        return jsonify({'Error': str(e) + ' is missing'}), 400
 
 
 @auth.route('/api/v2/auth/login', methods=['POST'])
@@ -119,9 +120,15 @@ def login_user():
             algorithm='HS256'
         )
         if token:
-            return jsonify({"msg": "You have successfully logged in ", "auth_token ": token.decode('UTF-8')}), 200
+            return jsonify({"message": "You have successfully logged in ", "auth_token ": token.decode('UTF-8')}), 200
     except KeyError as e:
         return ({'KeyError': str(e)})
+
+
+@auth.route('/api/v2/auth/logout', methods=['POST'])
+def logout():
+
+    return response_message('logged out', 'You have logged out', 200)
 
 
 @auth.route('/api/v2/users', methods=['GET'])
@@ -158,7 +165,7 @@ def get_user_parcels(current_user, id):
     if not db.get_user_by_value('users', 'user_id', id) is None:
         return jsonify({'user_parcels': db.get_user_parcels(id)})
     else:
-        return jsonify({"msg": 'User does not exist'}), 404
+        return jsonify({"message": 'User does not exist'}), 404
 
 
 @auth.route('/api/v2/auth/<int:user_id>/promote_user', methods=['PUT'])
@@ -166,6 +173,8 @@ def get_user_parcels(current_user, id):
 def promote_user(current_user, user_id):
     if db.get_user_by_value('users', 'user_id', user_id) is None:
         return response_message('Error', 'User  does not exist', 404)
+    if not db.is_admin(current_user.user_id):
+        return response_message('Forbidden operation', 'Not enough previledges', 403)
     db.update_role(user_id)
     return response_message('success', 'User is now admin', 200)
 
@@ -177,8 +186,3 @@ def demote_user(current_user, user_id):
         return response_message('Error', 'User does not exist', 404)
     db.revoke_admin_previledges(user_id)
     return response_message('success', 'User is now a regular user', 200)
-
-
-@auth.route('/api/v2/auth/logout',methods=['POST'])
-def logout():
-    pass

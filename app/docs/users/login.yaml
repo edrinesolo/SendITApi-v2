@@ -1,0 +1,60 @@
+
+User log in
+---
+tags:
+  - User login
+parameters:
+  - name: body
+    description: Post request for user log in
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "username"
+        - "password"
+      properties:
+        username:
+          type: "string"
+          example: "kasule@gmail.com"
+        password:
+          type: "string"
+          format: password
+          example: "********"
+responses:
+  200:
+    description: You have succesfully logged in
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "You have succesfully logged in"
+  400:
+    description: Failed to login
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "wrong username or password credentials"
+  401:
+    description: incorrect credentials
+    schema:
+      type: string
+      properties:
+        message:
+          type: string
+          enum:
+            - "incorect username"
+  202:
+    description: Invalid credentials
+    schema:
+      type: string
+      properties:
+        message:
+          type: string
+          enum:
+            - "username must all be string or ivalid email"

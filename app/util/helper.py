@@ -6,7 +6,6 @@ import os
 from app.auth.decorator import response_message, get_token
 from app.database.database import Database
 
-
 class Helper:
     def __init__(self):
         self.base_price = 2
@@ -117,3 +116,6 @@ class Helper:
             return 'Signature expired. Please log in again.', 401
         except jwt.InvalidTokenError:
             return 'Invalid token. Please log in again.', 401
+    
+
+

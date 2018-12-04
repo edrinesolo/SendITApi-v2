@@ -147,7 +147,7 @@ def add_parcel(current_user):
                                price)
     except psycopg2.IntegrityError:
         return response_message('message', 'something went wrong', 403)
-    return response_message('success', 'Parcel request has been created successfully', 201)
+    return jsonify({'success':'Parcel request has been created successfully'}),201
 
 
 # PUT /parcels/<parcelId>/cancel
